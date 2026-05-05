@@ -100,14 +100,26 @@ def transcribe(sequence: str) -> str:
 
 
 def sliding_window_gc(sequence: str, window_size: int, step: int = 1) -> list:
-    """Calculates GC content in a sliding window. — TODO"""
-    pass
+    """Calculates GC content in a sliding window.
+    Returns list of (start_position, gc_content) tuples.
+    Start positions use 1-based biological indexing.
+    """
+    results = []
+    for i in range(0, len(sequence) - window_size + 1, step):
+        window = sequence[i:i + window_size]
+        gc = round((window.count('G') + window.count('C')) / window_size * 100, 2)
+        results.append((i + 1, gc))
+    return results
 
 
 def save_sliding_window_csv(data: list, filename: str) -> None:
-    """Saves sliding window GC content data to a CSV file. — TODO"""
-    pass
-
+    """Saves sliding window GC content data to a CSV file.
+    Columns: start_position, gc_content.
+    """
+    with open(filename, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['start_position', 'gc_content'])
+        writer.writerows(data)
 
 def main():
     """Main program flow. — TODO"""
