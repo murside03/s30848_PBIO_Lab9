@@ -1,4 +1,4 @@
-# Album number: s12345
+# Album number: s30848
 # Date: 2026-05-05
 # Description: Random DNA sequence generator in FASTA format.
 #              Supports statistics, name embedding, and extra features.
@@ -122,9 +122,77 @@ def save_sliding_window_csv(data: list, filename: str) -> None:
         writer.writerows(data)
 
 def main():
-    """Main program flow. — TODO"""
-    pass
+    """Main program flow: input, generation, stats, file save, extra features."""
+
+    # --- Basic input ---
+    length = validate_positive_int("Enter sequence length: ")
+    seq_id = ""
+    while not seq_id or any(c.isspace() for c in seq_id):
+        seq_id = input("Enter sequence ID: ")
+        if any(c.isspace() for c in seq_id):
+            print("Error: ID cannot contain whitespace.")
+
+    description = input("Enter a description of the sequence: ")
+    name = input("Enter your name: ")
+
+    # --- Generate sequence ---
+    sequence = generate_sequence(length)
+
+    # --- Insert name into sequence (for FASTA file only) ---
+    sequence_with_name = insert_name(sequence, name)
+
+    # --- Format and save FASTA ---
+    fasta_str = format_fasta(seq_id, description, sequence_with_name)
+    fasta_filename = f"{seq_id}.fasta"
+    with open(fasta_filename, 'w') as f:
+        f.write(fasta_str)
+        f.write("# EOF_1\n")
+    print(f"\nSequence saved to file: {fasta_filename}")
+
+    # --- Print statistics (calculated on original sequence, without name) ---
+    stats = calculate_stats(sequence)
+    print(f"\nSequence statistics (n={length}):")
+    for nuc in ['A', 'C', 'G', 'T']:
+        print(f"  {nuc}: {stats[nuc]:.2f}%")
+    print(f"  GC-content: {stats['gc_ratio_A']:.2f}%")
+
+    # --- Extra feature 1: Motif search ---
+    motif = input("\nEnter a motif to search (or press Enter to skip): ").strip()
+    if motif:
+        positions = find_motif(sequence, motif)
+        if positions:
+            print(f"Motif '{motif}' found at positions: {positions}")
+        else:
+            print(f"Motif '{motif}' not found in sequence.")
+
+    # --- Extra feature 2: Complement & reverse complement ---
+    comp = complement(sequence)
+    rev_comp = reverse_complement(sequence)
+    comp_fasta = format_fasta(seq_id + "_comp", "Complementary strand", comp)
+    rev_comp_fasta = format_fasta(seq_id + "_revcomp", "Reverse complementary strand", rev_comp)
+    with open(fasta_filename, 'a') as f:
+        f.write(comp_fasta)
+        f.write(rev_comp_fasta)
+    print("Complementary and reverse complementary strands added to FASTA file.")
+
+    # --- Extra feature 3: Transcription ---
+    mrna = transcribe(sequence)
+    mrna_fasta = format_fasta(seq_id + "_mRNA", "mRNA transcription", mrna)
+    with open(fasta_filename, 'a') as f:
+        f.write(mrna_fasta)
+    print("mRNA transcription added to FASTA file.")
+
+    # --- Extra feature 4: Sliding window GC analysis ---
+    window_size = validate_positive_int(
+        "\nEnter sliding window size (e.g. 10): ",
+        min_val=1, max_val=length
+    )
+    gc_data = sliding_window_gc(sequence, window_size)
+    csv_filename = f"{seq_id}_gc_window.csv"
+    save_sliding_window_csv(gc_data, csv_filename)
+    print(f"Sliding window GC data saved to: {csv_filename}")
 
 
 if __name__ == "__main__":
     main()
+
