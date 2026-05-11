@@ -23,7 +23,7 @@ def calculate_stats(sequence: str) -> dict:
     stats = {}
     for nuc in ['A', 'C', 'G', 'T']:
         stats[nuc] = round((sequence.count(nuc) / n) * 100, 2)
-    stats['gc_ratio_A'] = round(stats['G'] + stats['C'], 2)
+    stats['GC'] = round(stats['G'] + stats['C'], 2)
     return stats
 
 def validate_positive_int(prompt: str,
@@ -146,7 +146,6 @@ def main():
     fasta_filename = f"{seq_id}.fasta"
     with open(fasta_filename, 'w') as f:
         f.write(fasta_str)
-        f.write("# EOF_1\n")
     print(f"\nSequence saved to file: {fasta_filename}")
 
     # --- Print statistics (calculated on original sequence, without name) ---
@@ -154,7 +153,7 @@ def main():
     print(f"\nSequence statistics (n={length}):")
     for nuc in ['A', 'C', 'G', 'T']:
         print(f"  {nuc}: {stats[nuc]:.2f}%")
-    print(f"  GC-content: {stats['gc_ratio_A']:.2f}%")
+    print(f"  GC-content: {stats['GC']:.2f}%")
 
     # --- Extra feature 1: Motif search ---
     motif = input("\nEnter a motif to search (or press Enter to skip): ").strip()
